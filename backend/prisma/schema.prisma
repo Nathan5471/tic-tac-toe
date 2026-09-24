@@ -1,0 +1,60 @@
+generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+enum GameStatus {
+    WAITING
+    IN_PROGRESS
+    ENDED_EARLY
+    COMPLETED
+}
+
+enum SlotStatus {
+    EMPTY
+    X
+    O
+}
+
+model User {
+    id       String @id @default(uuid())
+    username String @unique
+    password String
+    games1   Game[] @relation("Player1")
+    games2   Game[] @relation("Player2")
+}
+
+model Game {
+    id        String     @id @default(uuid())
+    player1   User       @relation(fields: [player1Id], references: [id], name: "Player1")
+    player1Id String
+    player2   User       @relation(fields: [player2Id], references: [id], name: "Player2")
+    player2Id String
+    status    GameStatus @default(WAITING)
+    board     Board?     @relation()
+    boardId   String?
+
+    @@unique([player1Id, player2Id])
+}
+
+model Board {
+    id     String     @id @default(uuid())
+    game   Game       @relation(fields: [gameId], references: [id])
+    gameId String     @unique
+    // 1 2 3
+    // 4 5 6
+    // 7 8 9
+    slot1  SlotStatus @default(EMPTY)
+    slot2  SlotStatus @default(EMPTY)
+    slot3  SlotStatus @default(EMPTY)
+    slot4  SlotStatus @default(EMPTY)
+    slot5  SlotStatus @default(EMPTY)
+    slot6  SlotStatus @default(EMPTY)
+    slot7  SlotStatus @default(EMPTY)
+    slot8  SlotStatus @default(EMPTY)
+    slot9  SlotStatus @default(EMPTY)
+}
