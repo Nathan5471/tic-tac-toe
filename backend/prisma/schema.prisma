@@ -32,8 +32,8 @@ model Game {
     id        String     @id @default(uuid())
     player1   User       @relation(fields: [player1Id], references: [id], name: "Player1")
     player1Id String
-    player2   User       @relation(fields: [player2Id], references: [id], name: "Player2")
-    player2Id String
+    player2   User?      @relation(fields: [player2Id], references: [id], name: "Player2")
+    player2Id String?
     status    GameStatus @default(WAITING)
     board     Board?     @relation()
     boardId   String?
