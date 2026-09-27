@@ -1,12 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../utils/AuthAPIHandler";
+import { login, getMe } from "../utils/AuthAPIHandler";
 
 function Login() {
+  const [loggedInUser, setLoggedInUser] = useState<null | { username: string }>(
+    null,
+  );
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkLoggedIn = async () => {
+      try {
+        const user = await getMe();
+        if (user) {
+          setLoggedInUser(user);
+        }
+      } catch (error) {
+        setLoggedInUser(null);
+      }
+    };
+    checkLoggedIn();
+  }, []);
 
   const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,10 +44,24 @@ function Login() {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-primary-a3">
+    <div className="w-screen h-screen flex flex-col items-center justify-center bg-primary-a3">
+      {loggedInUser && (
+        <div className="w-84 p-6 flex flex-col mb-4 bg-primary-a2 rounded-lg">
+          <p>
+            You're already logged in as{" "}
+            <span className="font-bold">{loggedInUser.username}</span>
+          </p>
+          <Link
+            to="/"
+            className="bg-primary-a1 hover:bg-primary-a0 text-primary-a3 font-bold p-2 rounded-lg mt-4 text-center"
+          >
+            Go to Home
+          </Link>
+        </div>
+      )}
       <form
         onSubmit={handleLogin}
-        className="w-64 p-6 flex flex-col bg-primary-a2 rounded-lg"
+        className="w-84 p-6 flex flex-col bg-primary-a2 rounded-lg"
       >
         <h1 className="text-2xl font-bold text-primary-a4">Login</h1>
         <label htmlFor="username" className="mt-4 text-primary-a4">
@@ -66,6 +97,12 @@ function Login() {
         >
           Login
         </button>
+        <p className="mt-4 text-primary-a4">
+          Don't have an account?{" "}
+          <Link to="/signup" className="font-bold hover:underline">
+            Sign up
+          </Link>
+        </p>
       </form>
     </div>
   );
