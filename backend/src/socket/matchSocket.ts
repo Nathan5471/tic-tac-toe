@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import cookie from "cookie";
+import { parseCookie } from "cookie";
 import socketAuthenticate from "../utils/socketAuthenticate";
 import type { AuthUser } from "../middleware/authenticate";
 import { getUpcomingGames, joinMatch } from "../controllers/matchController";
@@ -11,7 +11,7 @@ const matchSocket = (io: Server) => {
       if (!cookies) {
         throw new Error("Unauthorized");
       }
-      const parsedCookies = cookie.parseCookie(cookies);
+      const parsedCookies = parseCookie(cookies);
       if (!parsedCookies.token) {
         throw new Error("Unauthorized");
       }
@@ -28,6 +28,20 @@ const matchSocket = (io: Server) => {
   io.on("connection", (socket) => {
     const user = (socket as any).user as AuthUser;
     console.log(`User connected: ${user.id}`);
+    socket.emit("connected", {
+      id: user.id,
+      username: user.username,
+      joinedMatches: [
+        ...user.games1.filter(
+          (match) =>
+            match.status === "WAITING" || match.status === "IN_PROGRESS",
+        ),
+        ...user.games2.filter(
+          (match) =>
+            match.status === "WAITING" || match.status === "IN_PROGRESS",
+        ),
+      ],
+    });
 
     socket.on("getMatches", async () => {
       const userMatches = [...user.games1, ...user.games2];
