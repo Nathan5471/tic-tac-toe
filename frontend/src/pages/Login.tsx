@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login, getMe } from "../utils/AuthAPIHandler";
+import { IoEye, IoEyeOff } from "react-icons/io5";
 
 function Login() {
   const [loggedInUser, setLoggedInUser] = useState<null | { username: string }>(
@@ -8,6 +9,7 @@ function Login() {
   );
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -80,16 +82,25 @@ function Login() {
         <label htmlFor="password" className="mt-4 text-primary-a4">
           Password
         </label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter your password"
-          className="mt-2 p-2 bg-primary-a1 text-primary-a4 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="mt-2 flex flex-row bg-primary-a1 text-primary-a4 rounded-lg">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            className="p-2 w-full"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="p-2 ml-auto"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <IoEyeOff /> : <IoEye />}
+          </button>
+        </div>
         {error && <p className="mt-2 text-red-500">{error}</p>}
         <button
           type="submit"
