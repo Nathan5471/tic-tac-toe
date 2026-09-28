@@ -23,7 +23,17 @@ interface Game {
   status: "WAITING" | "IN_PROGRESS" | "COMPLETED";
   player1: { id: string; username: string };
   player2: { id: string; username: string };
-  board?: string[][];
+  board?: {
+    slot1: "EMPTY" | "X" | "O";
+    slot2: "EMPTY" | "X" | "O";
+    slot3: "EMPTY" | "X" | "O";
+    slot4: "EMPTY" | "X" | "O";
+    slot5: "EMPTY" | "X" | "O";
+    slot6: "EMPTY" | "X" | "O";
+    slot7: "EMPTY" | "X" | "O";
+    slot8: "EMPTY" | "X" | "O";
+    slot9: "EMPTY" | "X" | "O";
+  };
 }
 
 function Home() {
@@ -72,6 +82,10 @@ function Home() {
       setState("playing");
     });
 
+    socket.on("startedGame", (game: Game) => {
+      setCurrentGame(game);
+    });
+
     socket.emit("getMatches");
     matchIntervalRef.current = setInterval(() => {
       socket.emit("getMatches");
@@ -99,6 +113,12 @@ function Home() {
     e.preventDefault();
     if (!socketRef.current) return;
     socketRef.current.emit("joinMatch", gameId);
+  };
+
+  const handleStartGame = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!socketRef.current || !currentGame) return;
+    socketRef.current.emit("startMatch", currentGame.id);
   };
 
   if (state === "connecting") {
@@ -193,10 +213,33 @@ function Home() {
     );
   }
 
-  if (state === "playing") {
+  if (state === "playing" && currentGame) {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-primary-a3 text-primary-a4">
-        <h2 className="text-3xl font-bold">Playing Game</h2>
+        {currentGame.status === "WAITING" && (
+          <div className="bg-primary-a2 p-4 rounded-lg w-64">
+            <h2 className="text-3xl font-bold text-center">
+              {currentGame.name}
+            </h2>
+            <p className="text-lg font-bold">Current Players</p>
+            {currentGame.player1 && (
+              <p>Player1: {currentGame.player1.username}</p>
+            )}
+            {currentGame.player2 && (
+              <p>Player2: {currentGame.player2.username}</p>
+            )}
+            {currentGame.player1 && currentGame.player2 ? (
+              <button
+                className="bg-primary-a1 text-primary-a3 font-bold p-2 mt-2 rounded-lg hover:bg-primary-a0"
+                onClick={handleStartGame}
+              >
+                Start Game
+              </button>
+            ) : (
+              <p className="mt-2">Waiting for players...</p>
+            )}
+          </div>
+        )}
       </div>
     );
   }

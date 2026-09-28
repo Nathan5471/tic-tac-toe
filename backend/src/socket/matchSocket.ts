@@ -7,6 +7,7 @@ import {
   getUpdatedUser,
   joinMatch,
   createMatch,
+  startMatch,
 } from "../controllers/matchController";
 
 const matchSocket = (io: Server) => {
@@ -84,6 +85,16 @@ const matchSocket = (io: Server) => {
       } catch (error) {
         console.log("Error creating match:", error);
         socket.emit("error", "Error creating match");
+      }
+    });
+
+    socket.on("startMatch", async (matchId) => {
+      try {
+        const startedMatch = await startMatch(matchId, user.id);
+        io.to(startedMatch.id).emit("startedGame", startedMatch);
+      } catch (error) {
+        console.log("Error starting match:", error);
+        socket.emit("error", "Error starting match");
       }
     });
   });

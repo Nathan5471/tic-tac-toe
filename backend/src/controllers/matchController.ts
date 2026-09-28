@@ -125,3 +125,57 @@ export const createMatch = async (matchName: string, userId: string) => {
     throw new Error("Error creating match");
   }
 };
+
+export const startMatch = async (matchId: string, userId: string) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const match = await prisma.game.findUnique({
+      where: {
+        id: matchId,
+      },
+    });
+    if (!match) {
+      throw new Error("Match not found");
+    }
+    if (match.status !== "WAITING") {
+      throw new Error("Match has already been started!");
+    }
+    if (
+      !match.player2Id ||
+      (match.player1Id !== userId && match.player2Id !== userId)
+    ) {
+      throw new Error(
+        "User is not a participant of this match or match is not ready to start",
+      );
+    }
+    await prisma.board.create({
+      data: {
+        gameId: matchId,
+      },
+    });
+    const startedMatch = await prisma.game.update({
+      where: {
+        id: matchId,
+      },
+      data: {
+        status: "IN_PROGRESS",
+      },
+      include: {
+        player1: true,
+        player2: true,
+        board: true,
+      },
+    });
+    return startedMatch;
+  } catch (error) {
+    console.error("Error starting match:", error);
+    throw new Error("Error starting match");
+  }
+};
