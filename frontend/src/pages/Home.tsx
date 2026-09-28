@@ -92,6 +92,15 @@ function Home() {
     setNewGameName("");
   };
 
+  const handleJoinGame = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    gameId: string,
+  ) => {
+    e.preventDefault();
+    if (!socketRef.current) return;
+    socketRef.current.emit("joinMatch", gameId);
+  };
+
   if (state === "connecting") {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-primary-a3">
@@ -104,28 +113,39 @@ function Home() {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-primary-a3">
         <div className="flex flex-col">
-          <h1 className="text-4xl font-bold">Welcome, {user?.username}!</h1>
+          <h1 className="text-4xl font-bold mb-4">
+            Welcome, {user?.username}!
+          </h1>
           {userJoinedGames.length > 0 && (
-            <div className="flex flex-col bg-primary-a2">
+            <div className="flex flex-col bg-primary-a2 p-4 rounded-lg">
               <h2 className="text-2xl font-bold">
                 You've already joined some games!
               </h2>
-              <div className="grid gap-4">
+              <div className="grid grid-cols-5 gap-4 mt-2">
                 {userJoinedGames.map((game) => (
-                  <div key={game.id}>
-                    <button className="bg-primary-a1">Join Game</button>
+                  <div key={game.id} className="bg-primary-a1 p-2 rounded-lg ">
+                    <p className="text-lg font-bold">{game.name}</p>
+                    <button
+                      className="bg-primary-a0 p-2 rounded-lg text-primary-a3 font-bold hover:scale-105"
+                      onClick={(e) => handleJoinGame(e, game.id)}
+                    >
+                      Join Game
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
           )}
           {availableGames.length > 0 && (
-            <div className="flex flex-col bg-primary-a2">
+            <div className="flex flex-col bg-primary-a2 p-4 rounded-lg">
               <h2 className="text-2xl font-bold">Available Games</h2>
-              <div className="grid gap-4">
+              <div className="grid grid-cols-5 gap-4 mt-2">
                 {availableGames.map((game) => (
-                  <div key={game.id}>
-                    <button className="bg-primary-a1">Join Game</button>
+                  <div key={game.id} className="bg-primary-a1 p-2 rounded-lg ">
+                    <p className="text-lg font-bold">{game.name}</p>
+                    <button className="bg-primary-a0 p-2 rounded-lg text-primary-a3 font-bold hover:scale-105">
+                      Join Game
+                    </button>
                   </div>
                 ))}
               </div>
@@ -169,6 +189,14 @@ function Home() {
             Create
           </button>
         </form>
+      </div>
+    );
+  }
+
+  if (state === "playing") {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-primary-a3 text-primary-a4">
+        <h2 className="text-3xl font-bold">Playing Game</h2>
       </div>
     );
   }

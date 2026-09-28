@@ -14,6 +14,22 @@ export const getUpcomingGames = async () => {
   }
 };
 
+export const getUpdatedUser = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      games1: true,
+      games2: true,
+    },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
+};
+
 export const joinMatch = async (matchId: string, userId: string) => {
   try {
     const user = await prisma.user.findUnique({
@@ -27,16 +43,6 @@ export const joinMatch = async (matchId: string, userId: string) => {
     });
     if (!user) {
       throw new Error("User not found");
-    }
-    if (
-      user.games1.some(
-        (game) => game.status === "IN_PROGRESS" || game.status === "WAITING",
-      ) ||
-      user.games2.some(
-        (game) => game.status === "IN_PROGRESS" || game.status === "WAITING",
-      )
-    ) {
-      throw new Error("User is already in an ongoing or waiting match");
     }
 
     const match = await prisma.game.findUnique({

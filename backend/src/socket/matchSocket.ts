@@ -4,6 +4,7 @@ import socketAuthenticate from "../utils/socketAuthenticate";
 import type { AuthUser } from "../middleware/authenticate";
 import {
   getUpcomingGames,
+  getUpdatedUser,
   joinMatch,
   createMatch,
 } from "../controllers/matchController";
@@ -30,7 +31,7 @@ const matchSocket = (io: Server) => {
   });
 
   io.on("connection", (socket) => {
-    const user = (socket as any).user as AuthUser;
+    let user = (socket as any).user as AuthUser;
     console.log(`User connected: ${user.id}`);
     socket.emit("connected", {
       id: user.id,
@@ -48,16 +49,20 @@ const matchSocket = (io: Server) => {
     });
 
     socket.on("getMatches", async () => {
+      const newUser = await getUpdatedUser(user.id);
+      user = newUser;
       const userMatches = [...user.games1, ...user.games2];
       const ongoingMatches = userMatches.filter(
-        (match) => match.status === "IN_PROGRESS",
+        (match) => match.status === "IN_PROGRESS" || match.status === "WAITING",
       );
       if (ongoingMatches.length > 0) {
         socket.emit("ongoingMatches", ongoingMatches);
-        return;
       }
       const upcomingGames = await getUpcomingGames();
-      socket.emit("upcomingGames", upcomingGames);
+      const emittedGames = upcomingGames.filter(
+        (game) => game.player1Id !== user.id && game.player2Id !== user.id,
+      );
+      socket.emit("upcomingGames", emittedGames);
     });
 
     socket.on("joinMatch", async (matchId) => {
