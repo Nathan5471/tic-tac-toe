@@ -1,4 +1,5 @@
 import prisma from "../prisma/client";
+import checkForWinner from "../utils/checkForWinner";
 
 export const getUpcomingGames = async () => {
   try {
@@ -220,7 +221,7 @@ export const makeMove = async (
     if (slotValue !== "EMPTY") {
       throw new Error("Slot is already occupied");
     }
-    await prisma.board.update({
+    const updatedBoard = await prisma.board.update({
       where: {
         id: game.board.id,
       },
@@ -229,12 +230,22 @@ export const makeMove = async (
           game.currentTurn === 1 ? "X" : "O",
       },
     });
+    const winner = checkForWinner(updatedBoard);
     const updatedGame = await prisma.game.update({
       where: {
         id: gameId,
       },
       data: {
         currentTurn: game.currentTurn === 1 ? 2 : 1,
+        winner:
+          winner === "X"
+            ? 1
+            : winner === "O"
+              ? 2
+              : winner === "DRAW"
+                ? 0
+                : null,
+        status: winner ? "COMPLETED" : "IN_PROGRESS",
       },
       include: {
         player1: true,

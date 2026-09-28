@@ -36,7 +36,7 @@ model Game {
     player2     User?      @relation(fields: [player2Id], references: [id], name: "Player2")
     player2Id   String?
     currentTurn Int        @default(1)
-    winner      Int?
+    winner      Int? // 0 for draw
     status      GameStatus @default(WAITING)
     board       Board?     @relation()
     boardId     String?
