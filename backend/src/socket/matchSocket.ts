@@ -2,7 +2,11 @@ import { Server } from "socket.io";
 import { parseCookie } from "cookie";
 import socketAuthenticate from "../utils/socketAuthenticate";
 import type { AuthUser } from "../middleware/authenticate";
-import { getUpcomingGames, joinMatch } from "../controllers/matchController";
+import {
+  getUpcomingGames,
+  joinMatch,
+  createMatch,
+} from "../controllers/matchController";
 
 const matchSocket = (io: Server) => {
   io.use(async (socket, next) => {
@@ -60,10 +64,21 @@ const matchSocket = (io: Server) => {
       try {
         const updatedMatch = await joinMatch(matchId, user.id);
         socket.join(updatedMatch.id);
-        socket.emit("joinedMatch", updatedMatch);
+        io.to(updatedMatch.id).emit("joinedGame", updatedMatch);
       } catch (error) {
         console.log("Error joining match:", error);
         socket.emit("error", "Error joining match");
+      }
+    });
+
+    socket.on("createMatch", async (matchName) => {
+      try {
+        const newMatch = await createMatch(matchName, user.id);
+        socket.join(newMatch.id);
+        io.to(newMatch.id).emit("joinedGame", newMatch);
+      } catch (error) {
+        console.log("Error creating match:", error);
+        socket.emit("error", "Error creating match");
       }
     });
   });

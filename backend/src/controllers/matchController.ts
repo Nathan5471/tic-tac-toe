@@ -87,3 +87,35 @@ export const joinMatch = async (matchId: string, userId: string) => {
     throw new Error("Error joining match");
   }
 };
+
+export const createMatch = async (matchName: string, userId: string) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        games1: true,
+        games2: true,
+      },
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const newGame = await prisma.game.create({
+      data: {
+        name: matchName,
+        player1Id: userId,
+        status: "WAITING",
+      },
+      include: {
+        player1: true,
+        player2: true,
+      },
+    });
+    return newGame;
+  } catch (error) {
+    console.error("Error creating match:", error);
+    throw new Error("Error creating match");
+  }
+};
