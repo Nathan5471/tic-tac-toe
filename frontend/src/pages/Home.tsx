@@ -243,6 +243,56 @@ function Home() {
             )}
           </div>
         )}
+        {currentGame.status === "IN_PROGRESS" && (
+          <div className="bg-primary-a2 p-4 rounded-lg w-lg h-86">
+            <h2 className="text-3xl font-bold text-center">
+              {currentGame.name} - {currentGame.player1.username} vs{" "}
+              {currentGame.player2?.username}
+            </h2>
+            <div className="mt-2 grid grid-cols-3 gap-4 h-5/6">
+              {currentGame.board && (
+                <>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot1 === "X" && "X"}
+                    {currentGame.board.slot1 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot2 === "X" && "X"}
+                    {currentGame.board.slot2 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot3 === "X" && "X"}
+                    {currentGame.board.slot3 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot4 === "X" && "X"}
+                    {currentGame.board.slot4 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot5 === "X" && "X"}
+                    {currentGame.board.slot5 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot6 === "X" && "X"}
+                    {currentGame.board.slot6 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot7 === "X" && "X"}
+                    {currentGame.board.slot7 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot8 === "X" && "X"}
+                    {currentGame.board.slot8 === "O" && "O"}
+                  </div>
+                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                    {currentGame.board.slot9 === "X" && "X"}
+                    {currentGame.board.slot9 === "O" && "O"}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

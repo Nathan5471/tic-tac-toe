@@ -35,6 +35,7 @@ model Game {
     player1Id String
     player2   User?      @relation(fields: [player2Id], references: [id], name: "Player2")
     player2Id String?
+    winner    Int?
     status    GameStatus @default(WAITING)
     board     Board?     @relation()
     boardId   String?
