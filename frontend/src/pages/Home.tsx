@@ -23,6 +23,8 @@ interface Game {
   status: "WAITING" | "IN_PROGRESS" | "COMPLETED";
   player1: { id: string; username: string };
   player2: { id: string; username: string };
+  currentTurn: number;
+  winner: number;
   board?: {
     slot1: "EMPTY" | "X" | "O";
     slot2: "EMPTY" | "X" | "O";
@@ -38,12 +40,7 @@ interface Game {
 
 function Home() {
   const [state, setState] = useState<
-    | "connecting"
-    | "connected"
-    | "creatingGame"
-    | "waitingForGame"
-    | "playing"
-    | "completed"
+    "connecting" | "connected" | "creatingGame" | "waitingForGame" | "playing"
   >("connecting");
   const [user, setUser] = useState<null | User>(null);
   const [userJoinedGames, setUserJoinedGames] = useState<GameOption[]>([]);
@@ -86,6 +83,10 @@ function Home() {
       setCurrentGame(game);
     });
 
+    socket.on("updatedGame", (game: Game) => {
+      setCurrentGame(game);
+    });
+
     socket.emit("getMatches");
     matchIntervalRef.current = setInterval(() => {
       socket.emit("getMatches");
@@ -119,6 +120,15 @@ function Home() {
     e.preventDefault();
     if (!socketRef.current || !currentGame) return;
     socketRef.current.emit("startMatch", currentGame.id);
+  };
+
+  const handleMakeMove = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    slot: number,
+  ) => {
+    e.preventDefault();
+    if (!socketRef.current || !currentGame) return;
+    socketRef.current.emit("makeMove", { gameId: currentGame.id, slot });
   };
 
   if (state === "connecting") {
@@ -244,50 +254,136 @@ function Home() {
           </div>
         )}
         {currentGame.status === "IN_PROGRESS" && (
-          <div className="bg-primary-a2 p-4 rounded-lg w-lg h-86">
+          <div className="bg-primary-a2 p-4 rounded-lg w-lg h-92">
             <h2 className="text-3xl font-bold text-center">
               {currentGame.name} - {currentGame.player1.username} vs{" "}
               {currentGame.player2?.username}
             </h2>
-            <div className="mt-2 grid grid-cols-3 gap-4 h-5/6">
+            <p className="text-xl mt-1 text-center">
+              {currentGame.currentTurn === 1
+                ? `${currentGame.player1.username}'s turn`
+                : `${currentGame.player2?.username}'s turn`}
+            </p>
+            <div className="mt-2 grid grid-cols-3 gap-2 h-3/4">
               {currentGame.board && (
                 <>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 1)}
+                    disabled={
+                      currentGame.board.slot1 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot1 === "X" && "X"}
                     {currentGame.board.slot1 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 2)}
+                    disabled={
+                      currentGame.board.slot2 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot2 === "X" && "X"}
                     {currentGame.board.slot2 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 3)}
+                    disabled={
+                      currentGame.board.slot3 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot3 === "X" && "X"}
                     {currentGame.board.slot3 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 4)}
+                    disabled={
+                      currentGame.board.slot4 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot4 === "X" && "X"}
                     {currentGame.board.slot4 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 5)}
+                    disabled={
+                      currentGame.board.slot5 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot5 === "X" && "X"}
                     {currentGame.board.slot5 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 6)}
+                    disabled={
+                      currentGame.board.slot6 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot6 === "X" && "X"}
                     {currentGame.board.slot6 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 7)}
+                    disabled={
+                      currentGame.board.slot7 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot7 === "X" && "X"}
                     {currentGame.board.slot7 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 8)}
+                    disabled={
+                      currentGame.board.slot8 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot8 === "X" && "X"}
                     {currentGame.board.slot8 === "O" && "O"}
-                  </div>
-                  <div className="flex w-full h-full items-center justify-center bg-primary-a1">
+                  </button>
+                  <button
+                    className="flex w-36 h-18 items-center justify-center bg-primary-a1"
+                    onClick={(e) => handleMakeMove(e, 9)}
+                    disabled={
+                      currentGame.board.slot9 !== "EMPTY" ||
+                      (currentGame.currentTurn === 1
+                        ? currentGame.player1.id !== user!.id
+                        : currentGame.player2?.id !== user!.id)
+                    }
+                  >
                     {currentGame.board.slot9 === "X" && "X"}
                     {currentGame.board.slot9 === "O" && "O"}
-                  </div>
+                  </button>
                 </>
               )}
             </div>

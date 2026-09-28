@@ -29,23 +29,24 @@ model User {
 }
 
 model Game {
-    id        String     @id @default(uuid())
-    name      String
-    player1   User       @relation(fields: [player1Id], references: [id], name: "Player1")
-    player1Id String
-    player2   User?      @relation(fields: [player2Id], references: [id], name: "Player2")
-    player2Id String?
-    winner    Int?
-    status    GameStatus @default(WAITING)
-    board     Board?     @relation()
-    boardId   String?
+    id          String     @id @default(uuid())
+    name        String
+    player1     User       @relation(fields: [player1Id], references: [id], name: "Player1")
+    player1Id   String
+    player2     User?      @relation(fields: [player2Id], references: [id], name: "Player2")
+    player2Id   String?
+    currentTurn Int        @default(1)
+    winner      Int?
+    status      GameStatus @default(WAITING)
+    board       Board?     @relation()
+    boardId     String?
 
     @@unique([player1Id, player2Id])
 }
 
 model Board {
     id     String     @id @default(uuid())
-    game   Game       @relation(fields: [gameId], references: [id])
+    game   Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
     gameId String     @unique
     // 1 2 3
     // 4 5 6

@@ -8,6 +8,7 @@ import {
   joinMatch,
   createMatch,
   startMatch,
+  makeMove,
 } from "../controllers/matchController";
 
 const matchSocket = (io: Server) => {
@@ -95,6 +96,16 @@ const matchSocket = (io: Server) => {
       } catch (error) {
         console.log("Error starting match:", error);
         socket.emit("error", "Error starting match");
+      }
+    });
+
+    socket.on("makeMove", async ({ gameId, slot }) => {
+      try {
+        const updatedGame = await makeMove(gameId, user.id, slot);
+        io.to(updatedGame.id).emit("updatedGame", updatedGame);
+      } catch (error) {
+        console.log("Error making move:", error);
+        socket.emit("error", "Error making move");
       }
     });
   });

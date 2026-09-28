@@ -179,3 +179,72 @@ export const startMatch = async (matchId: string, userId: string) => {
     throw new Error("Error starting match");
   }
 };
+
+export const makeMove = async (
+  gameId: string,
+  userId: string,
+  slot: number,
+) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const game = await prisma.game.findUnique({
+      where: { id: gameId },
+      include: {
+        board: true,
+      },
+    });
+    if (!game) {
+      throw new Error("Game not found");
+    }
+    if (game.status !== "IN_PROGRESS") {
+      throw new Error("Game is not in progress");
+    }
+    if (game.player1Id !== userId && game.player2Id !== userId) {
+      throw new Error("User is not a participant of this game");
+    }
+    if (
+      (game.currentTurn === 1 && game.player1Id !== userId) ||
+      (game.currentTurn === 2 && game.player2Id !== userId)
+    ) {
+      throw new Error("It's not your turn");
+    }
+    if (slot < 0 || slot > 8 || !game.board) {
+      throw new Error("Invalid slot or no board");
+    }
+    const slotValue = game.board[`slot${slot}` as keyof typeof game.board];
+    if (slotValue !== "EMPTY") {
+      throw new Error("Slot is already occupied");
+    }
+    await prisma.board.update({
+      where: {
+        id: game.board.id,
+      },
+      data: {
+        [`slot${slot}` as keyof typeof game.board]:
+          game.currentTurn === 1 ? "X" : "O",
+      },
+    });
+    const updatedGame = await prisma.game.update({
+      where: {
+        id: gameId,
+      },
+      data: {
+        currentTurn: game.currentTurn === 1 ? 2 : 1,
+      },
+      include: {
+        player1: true,
+        player2: true,
+        board: true,
+      },
+    });
+    return updatedGame;
+  } catch (error) {
+    console.error("Error making move:", error);
+    throw new Error("Error making move");
+  }
+};
