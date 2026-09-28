@@ -163,7 +163,10 @@ function Home() {
                 {availableGames.map((game) => (
                   <div key={game.id} className="bg-primary-a1 p-2 rounded-lg ">
                     <p className="text-lg font-bold">{game.name}</p>
-                    <button className="bg-primary-a0 p-2 rounded-lg text-primary-a3 font-bold hover:scale-105">
+                    <button
+                      className="bg-primary-a0 p-2 rounded-lg text-primary-a3 font-bold hover:scale-105"
+                      onClick={(e) => handleJoinGame(e, game.id)}
+                    >
                       Join Game
                     </button>
                   </div>
