@@ -131,6 +131,18 @@ function Home() {
     socketRef.current.emit("makeMove", { gameId: currentGame.id, slot });
   };
 
+  const handleGoToHome = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setState("connected");
+    setCurrentGame(null);
+    setAvailableGames([]);
+    setUserJoinedGames([]);
+    socketRef.current.emit("getMatches");
+    matchIntervalRef.current = setInterval(() => {
+      socketRef.current.emit("getMatches");
+    }, 1000);
+  };
+
   if (state === "connecting") {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-primary-a3">
@@ -387,6 +399,31 @@ function Home() {
                 </>
               )}
             </div>
+          </div>
+        )}
+        {currentGame.status === "COMPLETED" && (
+          <div className="flex flex-col p-4 items-center justify-center bg-primary-a2 rounded-lg">
+            {currentGame.winner === 0 && (
+              <h3 className="text-xl font-bold">It's a draw!</h3>
+            )}
+            {currentGame.winner === 1 &&
+              (currentGame.player1.id === user!.id ? (
+                <h3 className="text-xl font-bold">You won!</h3>
+              ) : (
+                <h3 className="text-xl font-bold">You lost :(</h3>
+              ))}
+            {currentGame.winner === 2 &&
+              (currentGame.player2?.id === user!.id ? (
+                <h3 className="text-xl font-bold">You won!</h3>
+              ) : (
+                <h3 className="text-xl font-bold">You lost :(</h3>
+              ))}
+            <button
+              className="p-2 mt-2 rounded-lg bg-primary-a1 hover:bg-primary-a0 text-primary-a3 font-bold"
+              onClick={handleGoToHome}
+            >
+              Go to Home
+            </button>
           </div>
         )}
       </div>

@@ -40,8 +40,6 @@ model Game {
     status      GameStatus @default(WAITING)
     board       Board?     @relation()
     boardId     String?
-
-    @@unique([player1Id, player2Id])
 }
 
 model Board {
