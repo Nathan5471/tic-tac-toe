@@ -1,0 +1,27 @@
+services:
+  tic-tac-toe:
+    image: nathan5471/tic-tac-toe:latest
+    container_name: tic-tac-toe
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/tic-tac-toe
+      - JWT_SECRET=
+    restart: unless-stopped
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=tic-tac-toe
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+volumes:
+  pgdata:

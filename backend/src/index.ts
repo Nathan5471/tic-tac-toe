@@ -38,6 +38,19 @@ if (process.env.IS_DEV) {
       changeOrigin: true,
     }),
   );
+} else {
+  app.use(express.static("public"));
+
+  app.use("/", (req, res) => {
+    (res.sendFile("./public/index.html"),
+      { root: "." },
+      (error: any) => {
+        if (error) {
+          console.error("Error sending index.html:", error);
+          res.status(500).send("Internal Server Error");
+        }
+      });
+  });
 }
 
 server.listen(3000, () => {
